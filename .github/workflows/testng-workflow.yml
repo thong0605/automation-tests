@@ -20,7 +20,7 @@ jobs:
 
       - name: Run test & generate report
         run: |
-          cd testng.test && mvn test
+          cd testng && mvn test
 
       - name: Upload report to artifacts
         uses: actions/upload-artifact@v4
