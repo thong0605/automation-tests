@@ -1,0 +1,50 @@
+env:
+  DISABLE_JOB: true
+
+name: Test & Upload Report
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+jobs:
+  testng-test-and-upload:
+    runs-on: ubuntu-latest
+    if: env.DISABLE_JOB == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Run test & generate report
+        run: |
+          cd testng.test && mvn test
+
+      - name: Upload report to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: testng-report
+          path: reports/
+
+      - name: Upload report to AgileTest.App
+        # env:
+        #   AGILETEST_BASE_URL: ${{ secrets.AGILETEST_BASE_URL }}
+        #   AGILETEST_AUTH_BASE_URL: ${{ secrets.AGILETEST_AUTH_BASE_URL }}
+        #   AGILETEST_CLIENT_ID: ${{ secrets.AGILETEST_CLIENT_ID }}
+        #   AGILETEST_CLIENT_SECRET: ${{ secrets.AGILETEST_CLIENT_SECRET }}
+        # run: |
+        #   docker run --rm \
+        #   -e AGILETEST_BASE_URL=$AGILETEST_BASE_URL \
+        #   -e AGILETEST_AUTH_BASE_URL=$AGILETEST_AUTH_BASE_URL \
+        #   -e AGILETEST_CLIENT_ID=$AGILETEST_CLIENT_ID \
+        #   -e AGILETEST_CLIENT_SECRET=$AGILETEST_CLIENT_SECRET \
+        #   -v ${{ github.workspace }}/reports:/reports \
+        #   ghcr.io/agiletestapp/agiletest-cli:latest \
+        #   test-execution import --framework-type testng --project-key TC \
+        #   /reports/testng-results.xml
