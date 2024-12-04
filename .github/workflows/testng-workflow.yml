@@ -3,6 +3,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      PROJECT_KEY:
+        description: The key of project
+        type: string
+        required: true # require project key
+      TEST_EXECUTION_KEY:
+        description: The key of test execution
+        type: string
+        required: false # optional test execution key
   schedule:
     - cron: "0 0 * * *"
 jobs:
@@ -34,12 +43,9 @@ jobs:
         env:
           AGILETEST_BASE_URL: ${{ secrets.AGILETEST_BASE_URL }}
           AGILETEST_CLIENT_TOKEN: ${{ secrets.AGILETEST_CLIENT_TOKEN }}
-          PROJECT_KEY: ${{ secrets.PROJECT_KEY }}
-          TEST_EXECUTION_KEY: ${{ secrets.TEST_EXECUTION_KEY }}
-
         run: |
           # Define API endpoint and authorization token
-          API_URL="$AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/automation/testng?projectKey=$PROJECT_KEY&testExecutionKey=$TEST_EXECUTION_KEY&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys"
+          API_URL="AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECTKEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys"
 
           # Upload report files
           for file in $(find target/surefire-reports -type f -name "*.xml"); do
@@ -50,23 +56,18 @@ jobs:
               --data-binary "@$file"
           done
       # After-Run Script
-      - name: After-Run Script - Upload Reports
+      - name: After-Run Script
         env:
           AGILETEST_BASE_URL: ${{ secrets.AGILETEST_BASE_URL }}
           AGILETEST_CLIENT_TOKEN: ${{ secrets.AGILETEST_CLIENT_TOKEN }}
-          PROJECT_KEY: ${{ secrets.PROJECT_KEY }}
-          TEST_EXECUTION_KEY: ${{ secrets.TEST_EXECUTION_KEY }}
         if: always() # Ensures this runs regardless of success/failure of previous steps
         run: |
-          echo "Executing after-run script..."
-          REPORT_DIR="target/surefire-reports"
-
-          # Check if the report directory exists
-          if [ -d "$REPORT_DIR" ]; then
-            echo "Found report directory: $REPORT_DIR"
-            curl -X POST -H "Content-Type: application/json" -H "Authorization:Bearer $AGILETEST_CLIENT_TOKEN" \
-            --data '{ "jobURL":"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}", "tool":"gitlab", "result":${{ job.status }}}' \
-            "$AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/$TEST_EXECUTION_KEY/pipeline/history?projectKey=$PROJECT_KEY"
+          if [ "${{ job.status }}" == "success" ]; then
+            RESULT="success"
           else
-            echo "No report directory found. Skipping upload."
+            RESULT="failed"
           fi
+
+          curl -X POST -H "Content-Type: application/json" -H "Authorization:Bearer $AGILETEST_CLIENT_TOKEN" \
+            --data '{ "repository": "'"${{ github.repository }}"'", "runId": "'"${{ github.run_id }}"'", "tool":"github", "result":"'"$RESULT"'" }' \
+            "$AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/${{ inputs.TEST_EXECUTION_KEY }}/pipeline/history?projectKey=${{ inputs.PROJECTKEY }}"
