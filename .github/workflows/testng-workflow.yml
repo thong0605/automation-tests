@@ -48,7 +48,7 @@ jobs:
           API_URL="AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECTKEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys"
 
           # Upload report files
-          for file in $(find target/surefire-reports -type f -name "*.xml"); do
+          for file in $(find /reports/*.xml -type f -name "*.xml"); do
             echo "Uploading $file to $API_URL"
             curl -X POST "$API_URL" \
               -H "Authorization: Bearer $AGILETEST_CLIENT_TOKEN" \
