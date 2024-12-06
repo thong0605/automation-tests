@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: testng-report
-          path: reports/
+          path: target/surfire-reports
 
       - name: Upload report to AgileTest.App
         env:
@@ -49,7 +49,7 @@ jobs:
           cd target/surefire-reports && pwd
 
           # Upload report files
-          for file in $(find /reports/*.xml -type f -name "*.xml"); do
+          for file in $(find target/surfire-reports/*.xml -type f -name "*.xml"); do
             echo "Uploading $file to $API_URL"
             curl -X POST "$API_URL" \
               -H "Authorization: Bearer $AGILETEST_CLIENT_TOKEN" \
