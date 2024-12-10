@@ -40,10 +40,12 @@ jobs:
         run: |
           # Define API endpoint and authorization token
           API_URL="AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECTKEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys"
-          cd target/surefire-reports && pwd
+
+          ls -la /home/runner/work/automation-tests/automation-tests/testng/target/test-classes/*.xml
+          # cd target/surefire-reports && pwd
 
           # Upload report files
-          for file in $(find target/surfire-reports/*.xml -type f -name "*.xml"); do
+          for file in $(find /home/runner/work/automation-tests/automation-tests/testng/target/test-classes/ -type f -name "*.xml"); do
             echo "Uploading $file to $API_URL"
             curl -X POST "$API_URL" \
               -H "Authorization: Bearer $AGILETEST_CLIENT_TOKEN" \
