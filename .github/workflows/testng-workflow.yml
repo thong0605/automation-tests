@@ -33,12 +33,6 @@ jobs:
           mvn clean install
           mvn test
 
-      - name: Upload report to artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: testng-report
-          path: target/surfire-reports
-
       - name: Upload report to AgileTest.App
         env:
           AGILETEST_BASE_URL: ${{ secrets.AGILETEST_BASE_URL }}
@@ -72,3 +66,9 @@ jobs:
           curl -X POST -H "Content-Type: application/json" -H "Authorization:Bearer $AGILETEST_CLIENT_TOKEN" \
             --data '{ "repository": "'"${{ github.repository }}"'", "runId": "'"${{ github.run_id }}"'", "tool":"github", "result":"'"$RESULT"'" }' \
             "$AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/${{ inputs.TEST_EXECUTION_KEY }}/pipeline/history?projectKey=${{ inputs.PROJECTKEY }}"
+
+      - name: Upload report to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: testng-report
+          path: target/surfire-reports
