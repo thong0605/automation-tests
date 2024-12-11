@@ -41,8 +41,8 @@ jobs:
           # Define API endpoint and authorization token
           API_URL="AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECTKEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys"
 
-          dir /s /b /o:gn
-          ls -la target/test-classes/*.xml
+          ls -R
+          # ls -la target/test-classes/*.xml
           # cd target/surefire-reports && pwd
 
           # Upload report files
