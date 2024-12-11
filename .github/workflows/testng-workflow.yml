@@ -48,7 +48,7 @@ jobs:
           # Upload report files
           echo "Uploading file to $AGILETEST_BASE_URL"
           echo "Uploading file to ${{ secrets.AGILETEST_BASE_URL }}"
-          curl -X POST "${{ secrets.AGILETEST_BASE_URL }}/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECTKEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys" \
+          curl -X POST "${{ secrets.AGILETEST_BASE_URL }}/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECT_KEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys" \
             -H "Authorization: Bearer ${{ secrets.AGILETEST_CLIENT_TOKEN }}" \
             -H "Content-Type: application/xml" \
             --data-binary "@./testng/target/surefire-reports/testng-results.xml"
@@ -67,7 +67,7 @@ jobs:
 
           curl -X POST -H "Content-Type: application/json" -H "Authorization:Bearer ${{ secrets.AGILETEST_CLIENT_TOKEN }}" \
             --data '{ "repository": "'"${{ github.repository }}"'", "runId": "'"${{ github.run_id }}"'", "tool":"github", "result":"'"$RESULT"'" }' \
-            "${{ secrets.AGILETEST_BASE_URL }}/rest/agiletest/1.0/test-executions/${{ inputs.TEST_EXECUTION_KEY }}/pipeline/history?projectKey=${{ inputs.PROJECTKEY }}"
+            "${{ secrets.AGILETEST_BASE_URL }}/rest/agiletest/1.0/test-executions/${{ inputs.TEST_EXECUTION_KEY }}/pipeline/history?projectKey=${{ inputs.PROJECT_KEY }}"
 
       - name: Upload report to artifacts
         uses: actions/upload-artifact@v4
