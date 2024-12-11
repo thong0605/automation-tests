@@ -41,18 +41,17 @@ jobs:
           # Define API endpoint and authorization token
           API_URL="AGILETEST_BASE_URL/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECTKEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys"
 
-          ls -R $PWD/*
-          ls -la ./testng/target/surefire-reports/*.xml
+          # ls -R $PWD/*
+          # ls -la ./testng/target/surefire-reports/*.xml
           # cd target/surefire-reports && pwd
+          # ./testng/target/surefire-reports/testng-results.xml
 
           # Upload report files
-          for file in $(find target/test-classes/ -type f -name "*.xml"); do
-            echo "Uploading $file to $API_URL"
+          echo "Uploading $file to $API_URL"
             curl -X POST "$API_URL" \
               -H "Authorization: Bearer $AGILETEST_CLIENT_TOKEN" \
               -H "Content-Type: application/xml" \
-              --data-binary "@$file"
-          done
+              --data-binary "@./testng/target/surefire-reports/testng-results.xml"
       # After-Run Script
       - name: After-Run Script
         env:
@@ -74,4 +73,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: testng-report
-          path: target/surfire-reports
+          path: ./testng/target/surefire-reports/testng-results.xml
