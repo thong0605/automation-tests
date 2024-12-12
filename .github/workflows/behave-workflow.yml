@@ -21,17 +21,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          distribution: "temurin"
-          java-version: "21"
+          python-version: 3.12
 
       - name: Run test & generate report
         run: |
-          cd testng
-          mvn clean install
-          mvn test
+          cd behave
+          pip install --upgrade pip
+          pip3 install behave
+          mkdir -p report
+          behave --format json --out report/behave_report.json
 
       - name: Upload report to AgileTest.App
         env:
@@ -48,10 +49,13 @@ jobs:
           # Upload report files
           echo "Uploading file to $AGILETEST_BASE_URL"
           echo "Uploading file to ${{ secrets.AGILETEST_BASE_URL }}"
-          curl -X POST "${{ secrets.AGILETEST_BASE_URL }}/rest/agiletest/1.0/test-executions/automation/testng?projectKey=${{ inputs.PROJECT_KEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys" \
+
+          cd report
+
+          curl -X POST "${{ secrets.AGILETEST_BASE_URL }}/rest/agiletest/1.0/test-executions/automation/behave?projectKey=${{ inputs.PROJECT_KEY }}&testExecutionKey=${{ inputs.TEST_EXECUTION_KEY }}&milestoneId=$milestoneId&fixVersions=$fixVersions&revision=$revision&testEnvironments=$testEnvironments&testPlanKeys=$testPlanKeys" \
             -H "Authorization: Bearer ${{ secrets.AGILETEST_CLIENT_TOKEN }}" \
-            -H "Content-Type: application/xml" \
-            --data-binary "@./testng/target/surefire-reports/testng-results.xml"
+            -H "Content-Type: application/json" \
+            --data-binary "@behave_report.json"
       # After-Run Script
       - name: After-Run Script
         env:
@@ -73,4 +77,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: testng-report
-          path: ./testng/target/surefire-reports/testng-results.xml
+          path: ./behave/report/behave_report.json
