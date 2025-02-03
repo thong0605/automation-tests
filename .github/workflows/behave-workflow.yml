@@ -12,8 +12,8 @@ on:
         description: The key of test execution
         type: string
         required: false # optional test execution key
-  schedule:
-    - cron: "0 0 * * *"
+  # schedule:
+  #   - cron: "0 0 * * *" # This runs daily at midnight UTC
 jobs:
   testng-test-and-upload:
     runs-on: ubuntu-latest
